@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="studio">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tic Tac Toe — The Unbeatable Edition</title>
+  <meta name="description" content="A beautifully crafted tic tac toe game with an unbeatable minimax AI, local two-player mode, and twelve hand-tuned themes. Created by Muhammad Amin Khan and Munawar Khan." />
+  <meta name="theme-color" content="#e9e5dc" id="themeColor" />
+  <meta property="og:title" content="Tic Tac Toe — The Unbeatable Edition" />
+  <meta property="og:description" content="Play a flawless minimax opponent. A draw is the best you can force." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('ttt.theme');
+        if (saved && /^[a-z]+$/.test(saved)) {
+          document.documentElement.setAttribute('data-theme', saved);
+        }
+      } catch (error) { /* storage unavailable */ }
+    })();
+  </script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#board">Skip to the board</a>
+
+  <svg class="svg-sprite" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="mark-x" viewBox="0 0 100 100">
+        <path d="M24 24 76 76M76 24 24 76" fill="none" stroke="currentColor" stroke-width="8.5" stroke-linecap="round" />
+      </symbol>
+      <symbol id="mark-o" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="29" fill="none" stroke="currentColor" stroke-width="8.5" />
+      </symbol>
+      <symbol id="icon-palette" viewBox="0 0 24 24">
+        <path d="M12 3a9 9 0 1 0 0 18h1.4a2.3 2.3 0 0 0 1.8-3.7 2.3 2.3 0 0 1 1.8-3.7H19A2.9 2.9 0 0 0 21.9 11 9 9 0 0 0 12 3Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+        <circle cx="7.5" cy="10" r="1.1" fill="currentColor" />
+        <circle cx="10.2" cy="6.9" r="1.1" fill="currentColor" />
+        <circle cx="14.1" cy="6.7" r="1.1" fill="currentColor" />
+        <circle cx="17" cy="9.7" r="1.1" fill="currentColor" />
+      </symbol>
+      <symbol id="icon-sound" viewBox="0 0 24 24">
+        <path d="M4 9h3.2L12 5.2v13.6L7.2 15H4V9Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+        <path d="M15.5 9a4.2 4.2 0 0 1 0 6M18.4 6.3a8.2 8.2 0 0 1 0 11.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+      </symbol>
+      <symbol id="icon-muted" viewBox="0 0 24 24">
+        <path d="M4 9h3.2L12 5.2v13.6L7.2 15H4V9Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+        <path d="m16 10 5 5m0-5-5 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+      </symbol>
+      <symbol id="icon-info" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7" />
+        <path d="M12 10.8v5.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        <circle cx="12" cy="7.8" r="1.15" fill="currentColor" />
+      </symbol>
+      <symbol id="icon-close" viewBox="0 0 24 24">
+        <path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      </symbol>
+      <symbol id="icon-restart" viewBox="0 0 24 24">
+        <path d="M20 11a8 8 0 1 0-2.1 6.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        <path d="M20 4v7h-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-undo" viewBox="0 0 24 24">
+        <path d="M8.5 7 4 11.5 8.5 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M4.4 11.5H14a5.5 5.5 0 0 1 0 11h-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      </symbol>
+      <symbol id="icon-spark" viewBox="0 0 24 24">
+        <path d="M12 3.2c.65 4.8 2.8 6.95 7.6 7.6-4.8.65-6.95 2.8-7.6 7.6-.65-4.8-2.8-6.95-7.6-7.6 4.8-.65 6.95-2.8 7.6-7.6Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24">
+        <path d="m5 12.5 4.3 4.3L19 6.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-shuffle" viewBox="0 0 24 24">
+        <path d="M4 7h3.2c4.7 0 5 10 9.6 10H20m0 0-3-3m3 3-3 3M4 17h3.2c1.4 0 2.5-.9 3.5-2.2M20 7h-3.2c-1.4 0-2.5.9-3.5 2.2m6.7 0-3-3m3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-shield" viewBox="0 0 24 24">
+        <path d="M12 3.2 19 6v5.4c0 4.3-2.9 7.5-7 9.4-4.1-1.9-7-5.1-7-9.4V6l7-2.8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+        <path d="m9 11.8 2.1 2.1 4.2-4.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+    </defs>
+  </svg>
+
+  <div class="ambient-mark" aria-hidden="true">X<span>O</span></div>
+
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="#main" aria-label="Tic Tac Toe — home">
+        <span class="brand-mark" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </span>
+        <span class="brand-copy">
+          <strong>Tic Tac Toe</strong>
+          <span>The unbeatable edition</span>
+        </span>
+      </a>
+
+      <p class="topbar-note">
+        <span class="live-dot" aria-hidden="true"></span>
+        Perfect engine · Local duels · 12 themes
+      </p>
+
+      <div class="topbar-actions">
+        <button class="tool-button" id="themeButton" type="button" aria-haspopup="dialog" aria-label="Choose a theme">
+          <svg class="icon" aria-hidden="true"><use href="#icon-palette"></use></svg>
+          <span class="tool-label">Theme</span>
+          <span class="theme-count">12</span>
+        </button>
+        <button class="tool-button icon-only" id="soundButton" type="button" aria-label="Mute sound" aria-pressed="true">
+          <svg class="icon sound-on-icon" aria-hidden="true"><use href="#icon-sound"></use></svg>
+          <svg class="icon sound-off-icon" aria-hidden="true"><use href="#icon-muted"></use></svg>
+        </button>
+        <button class="tool-button icon-only" id="aboutButton" type="button" aria-label="About this game" aria-haspopup="dialog">
+          <svg class="icon" aria-hidden="true"><use href="#icon-info"></use></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="play-grid" id="main">
+      <aside class="intro-rail">
+        <div class="intro-copy">
+          <p class="kicker"><span>01</span> A study in nine squares</p>
+          <h1>The perfect<br><em>opponent.</em></h1>
+          <p class="intro-text">
+            <span class="intro-lede">
+              The classic game, rebuilt with uncommon care. A flawless minimax engine,
+              a local two-player table, and twelve hand-tuned atmospheres.
+            </span>
+            <strong>The machine never loses — a draw is your best result.</strong>
+          </p>
+        </div>
+
+        <section class="setup" aria-labelledby="setupTitle">
+          <div class="section-heading">
+            <h2 id="setupTitle">Match setup</h2>
+            <span class="section-note" id="setupNote">Solo vs AI</span>
+          </div>
+
+          <div class="mode-switch" role="group" aria-label="Game mode">
+            <button class="mode-button is-active" id="modeAi" type="button" data-mode="ai" aria-pressed="true">
+              <span>Vs the machine</span>
+              <small>Unbeatable</small>
+            </button>
+            <button class="mode-button" id="modeLocal" type="button" data-mode="local" aria-pressed="false">
+              <span>Two players</span>
+              <small>Same device</small>
+            </button>
+          </div>
+
+          <div class="mark-row" id="markField">
+            <div class="mark-copy">
+              <span class="field-label">Play as</span>
+              <small id="markNote">The machine takes O</small>
+            </div>
+            <div class="mark-options" role="group" aria-label="Choose your mark">
+              <button class="mark-button is-active" id="markX" type="button" data-mark="X" aria-pressed="true" aria-label="Play as X">
+                <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-x"></use></svg>
+              </button>
+              <button class="mark-button" id="markO" type="button" data-mark="O" aria-pressed="false" aria-label="Play as O">
+                <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-o"></use></svg>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="record-panel" aria-labelledby="recordTitle">
+          <div class="section-heading">
+            <h2 id="recordTitle">Record</h2>
+            <button class="text-button" id="resetScores" type="button">Clear</button>
+          </div>
+          <div class="scoreboard">
+            <div class="score-column">
+              <span class="score-label" id="scoreLeftLabel">You</span>
+              <span class="score-mark mark-x" id="scoreLeftMark">X</span>
+              <strong class="score-value" id="scoreLeft">0</strong>
+            </div>
+            <div class="score-column is-draws">
+              <span class="score-label">Draws</span>
+              <span class="score-mark">—</span>
+              <strong class="score-value" id="scoreDraw">0</strong>
+            </div>
+            <div class="score-column">
+              <span class="score-label" id="scoreRightLabel">Machine</span>
+              <span class="score-mark mark-o" id="scoreRightMark">O</span>
+              <strong class="score-value" id="scoreRight">0</strong>
+            </div>
+          </div>
+          <p class="record-note">Saved on this device. <span id="streakNote">No rounds yet.</span></p>
+        </section>
+      </aside>
+
+      <section class="stage" aria-labelledby="stageTitle">
+        <h2 class="visually-hidden" id="stageTitle">Tic tac toe board</h2>
+        <div class="stage-heading">
+          <span class="round-label" id="roundLabel">Round 01</span>
+          <div class="turn-pill" id="turnPill" data-turn="x">
+            <span class="turn-dot" aria-hidden="true"></span>
+            <span id="status" role="status" aria-live="polite" aria-atomic="true">Your move, X</span>
+          </div>
+          <span class="stage-mode" id="stageMode">Solo</span>
+        </div>
+
+        <div class="board-shell" id="boardShell">
+          <span class="registration-mark top-left" aria-hidden="true"></span>
+          <span class="registration-mark top-right" aria-hidden="true"></span>
+          <span class="registration-mark bottom-left" aria-hidden="true"></span>
+          <span class="registration-mark bottom-right" aria-hidden="true"></span>
+          <div class="coord-row coord-top" aria-hidden="true"><span>A</span><span>B</span><span>C</span></div>
+          <div class="coord-column coord-left" aria-hidden="true"><span>1</span><span>2</span><span>3</span></div>
+          <div class="coord-column coord-right" aria-hidden="true"><span>1</span><span>2</span><span>3</span></div>
+          <div class="board" id="board" role="group" aria-label="Tic tac toe board. Use arrow keys to move between squares.">
+            <button class="cell" type="button" data-index="0" aria-label="A1, empty" aria-disabled="false">
+              <span class="cell-coord" aria-hidden="true">A1</span>
+              <svg class="mark mark-x" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-x"></use></svg>
+              <svg class="mark mark-o" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-o"></use></svg>
+            </button>
+            <button class="cell" type="button" data-index="1" aria-label="B1, empty" aria-disabled="false">
+              <span class="cell-coord" aria-hidden="true">B1</span>
+              <svg class="mark mark-x" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-x"></use></svg>
+              <svg class="mark mark-o" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-o"></use></svg>
+            </button>
+            <button class="cell" type="button" data-index="2" aria-label="C1, empty" aria-disabled="false">
+              <span class="cell-coord" aria-hidden="true">C1</span>
+              <svg class="mark mark-x" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-x"></use></svg>
+              <svg class="mark mark-o" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-o"></use></svg>
+            </button>
+            <button class="cell" type="button" data-index="3" aria-label="A2, empty" aria-disabled="false">
+              <span class="cell-coord" aria-hidden="true">A2</span>
+              <svg class="mark mark-x" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-x"></use></svg>
+              <svg class="mark mark-o" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-o"></use></svg>
+            </button>
+            <button class="cell" type="button" data-index="4" aria-label="B2, empty" aria-disabled="false">
+              <span class="cell-coord" aria-hidden="true">B2</span>
+              <svg class="mark mark-x" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-x"></use></svg>
+              <svg class="mark mark-o" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-o"></use></svg>
+            </button>
+            <button class="cell" type="button" data-index="5" aria-label="C2, empty" aria-disabled="false">
+              <span class="cell-coord" aria-hidden="true">C2</span>
+              <svg class="mark mark-x" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-x"></use></svg>
+              <svg class="mark mark-o" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-o"></use></svg>
+            </button>
+            <button class="cell" type="button" data-index="6" aria-label="A3, empty" aria-disabled="false">
+              <span class="cell-coord" aria-hidden="true">A3</span>
+              <svg class="mark mark-x" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-x"></use></svg>
+              <svg class="mark mark-o" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-o"></use></svg>
+            </button>
+            <button class="cell" type="button" data-index="7" aria-label="B3, empty" aria-disabled="false">
+              <span class="cell-coord" aria-hidden="true">B3</span>
+              <svg class="mark mark-x" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-x"></use></svg>
+              <svg class="mark mark-o" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-o"></use></svg>
+            </button>
+            <button class="cell" type="button" data-index="8" aria-label="C3, empty" aria-disabled="false">
+              <span class="cell-coord" aria-hidden="true">C3</span>
+              <svg class="mark mark-x" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-x"></use></svg>
+              <svg class="mark mark-o" viewBox="0 0 100 100" aria-hidden="true"><use href="#mark-o"></use></svg>
+            </button>
+            <svg class="win-overlay" id="winOverlay" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <line id="winLine" x1="16.67" y1="16.67" x2="83.33" y2="83.33" pathLength="1"></line>
+            </svg>
+          </div>
+        </div>
+
+        <div class="board-actions" aria-label="Game actions">
+          <button class="button button-primary" id="newRound" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#icon-restart"></use></svg>
+            <span id="newRoundLabel">New round</span>
+            <kbd>N</kbd>
+          </button>
+          <button class="button button-secondary" id="undoButton" type="button" disabled>
+            <svg class="icon" aria-hidden="true"><use href="#icon-undo"></use></svg>
+            <span>Undo</span>
+            <kbd>U</kbd>
+          </button>
+          <button class="button button-secondary" id="hintButton" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#icon-spark"></use></svg>
+            <span>Hint</span>
+            <kbd>H</kbd>
+          </button>
+        </div>
+
+        <p class="assist-line" id="assistText" role="status" aria-live="polite">Click a square to begin. The first move is yours.</p>
+      </section>
+
+      <aside class="notes-rail">
+        <article class="opponent-panel" aria-labelledby="opponentName">
+          <div class="panel-head">
+            <span class="panel-label">The opponent</span>
+            <span class="status-badge" id="opponentBadge">
+              <svg class="icon" aria-hidden="true"><use href="#icon-shield"></use></svg>
+              Unbeatable
+            </span>
+          </div>
+          <div class="opponent-profile">
+            <span class="opponent-glyph" id="opponentGlyph" aria-hidden="true">O</span>
+            <div>
+              <h2 id="opponentName">The machine</h2>
+              <p id="opponentMeta">Minimax engine · perfect play</p>
+            </div>
+          </div>
+          <p class="opponent-copy" id="opponentCopy">
+            It has solved every possible branch of this board. The best available result is a draw.
+          </p>
+          <dl class="opponent-specs">
+            <div><dt id="specOneLabel">Search</dt><dd id="specOneValue">Complete</dd></div>
+            <div><dt id="specTwoLabel">Record</dt><dd id="specTwoValue">Unbeaten</dd></div>
+            <div><dt id="specThreeLabel">Reply</dt><dd id="specThreeValue">Instant</dd></div>
+          </dl>
+        </article>
+
+        <section class="log-panel" aria-labelledby="logTitle">
+          <div class="section-heading">
+            <h2 id="logTitle">Move log</h2>
+            <span class="log-count" id="moveCount">0 / 9</span>
+          </div>
+          <ol class="move-log" id="moveLog">
+            <li class="empty-log">The board awaits its first mark.</li>
+          </ol>
+        </section>
+
+        <button class="palette-card" id="themeButtonSide" type="button" aria-haspopup="dialog">
+          <span class="palette-swatches" aria-hidden="true">
+            <i class="swatch swatch-bg"></i>
+            <i class="swatch swatch-x"></i>
+            <i class="swatch swatch-o"></i>
+            <i class="swatch swatch-accent"></i>
+          </span>
+          <span class="palette-copy">
+            <span>Table theme</span>
+            <strong id="themeName">Studio</strong>
+          </span>
+          <svg class="icon palette-arrow" aria-hidden="true"><use href="#icon-palette"></use></svg>
+        </button>
+      </aside>
+    </main>
+
+    <footer class="site-footer">
+      <div class="credit">
+        <span class="credit-mark" aria-hidden="true">A<span>M</span></span>
+        <p>
+          <span>Designed &amp; developed by</span>
+          <strong>Muhammad Amin Khan</strong>
+          <span class="credit-amp">&amp;</span>
+          <strong>Munawar Khan</strong>
+        </p>
+      </div>
+      <p class="footer-meta">
+        <span>© <span id="year">2026</span> The Unbeatable Edition</span>
+        <span aria-hidden="true">·</span>
+        <span>Vanilla HTML, CSS &amp; JS</span>
+      </p>
+    </footer>
+  </div>
+
+  <dialog class="sheet theme-sheet" id="themeSheet" aria-labelledby="themeSheetTitle">
+    <div class="sheet-head">
+      <div>
+        <p class="kicker"><span>12</span> Hand-tuned atmospheres</p>
+        <h2 id="themeSheetTitle">Choose your table.</h2>
+        <p>Every theme is saved for your next visit.</p>
+      </div>
+      <button class="icon-button" id="closeThemeSheet" type="button" aria-label="Close theme chooser">
+        <svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+      </button>
+    </div>
+    <div class="theme-grid" id="themeGrid" role="group" aria-label="Available themes"></div>
+    <div class="sheet-foot">
+      <span class="sheet-current">Current theme: <strong id="currentThemeName">Studio</strong></span>
+      <button class="button button-secondary" id="randomTheme" type="button">
+        <svg class="icon" aria-hidden="true"><use href="#icon-shuffle"></use></svg>
+        Surprise me
+      </button>
+    </div>
+  </dialog>
+
+  <dialog class="sheet about-sheet" id="aboutSheet" aria-labelledby="aboutTitle">
+    <div class="sheet-head">
+      <div>
+        <p class="kicker"><span>About</span> A small game, made carefully</p>
+        <h2 id="aboutTitle">Built for the<br><em>love of the game.</em></h2>
+      </div>
+      <button class="icon-button" id="closeAboutSheet" type="button" aria-label="Close about dialog">
+        <svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+      </button>
+    </div>
+
+    <div class="about-body">
+      <p class="about-lead">
+        Tic Tac Toe, The Unbeatable Edition is a portfolio piece about the details:
+        perfect game logic, tactile interaction, thoughtful accessibility, and a theme
+        for every mood.
+      </p>
+
+      <div class="about-grid">
+        <section>
+          <span class="about-index">01</span>
+          <h3>Unbeatable by design</h3>
+          <p>The AI uses exhaustive minimax search with alpha-beta pruning. It never loses. Against perfect play, the best result available to you is a draw.</p>
+        </section>
+        <section>
+          <span class="about-index">02</span>
+          <h3>Two ways to play</h3>
+          <p>Challenge the machine, or pass the device to a friend in local two-player mode. Choose X or O, take back a move, or ask for a hint.</p>
+        </section>
+        <section>
+          <span class="about-index">03</span>
+          <h3>Twelve atmospheres</h3>
+          <p>From bare gallery paper to late-night arcade neon, every palette is hand-tuned for contrast, clarity, and a distinct point of view.</p>
+        </section>
+        <section>
+          <span class="about-index">04</span>
+          <h3>Care in the details</h3>
+          <p>Scores persist on your device, sound is generated in the browser, motion respects your system preferences, and every control works from the keyboard.</p>
+        </section>
+      </div>
+
+      <div class="about-credits">
+        <span class="panel-label">Designed &amp; developed by</span>
+        <div class="credit-names">
+          <strong>Muhammad Amin Khan</strong>
+          <span aria-hidden="true">+</span>
+          <strong>Munawar Khan</strong>
+        </div>
+        <p>With an obsession for clean interaction and games that feel good to touch.</p>
+      </div>
+
+      <div class="shortcuts">
+        <span class="panel-label">Keyboard</span>
+        <p><kbd>N</kbd> New round <kbd>U</kbd> Undo <kbd>H</kbd> Hint <kbd>T</kbd> Themes <kbd>Esc</kbd> Close</p>
+      </div>
+    </div>
+
+    <div class="sheet-foot about-foot">
+      <button class="text-button text-button-danger" id="resetData" type="button">Reset saved data</button>
+      <button class="button button-primary" id="aboutDone" type="button">Back to the board</button>
+    </div>
+  </dialog>
+
+  <dialog class="confirm-sheet" id="confirmSheet" aria-labelledby="confirmTitle" aria-describedby="confirmCopy">
+    <h2 id="confirmTitle">Clear your record?</h2>
+    <p id="confirmCopy">This removes your saved scores, theme, and sound preference. The board stays ready.</p>
+    <div class="confirm-actions">
+      <button class="button button-secondary" id="confirmCancel" type="button">Keep my data</button>
+      <button class="button button-danger" id="confirmReset" type="button">Reset everything</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <noscript>
+    <div class="noscript-note">This game needs JavaScript enabled to play.</div>
+  </noscript>
+
+  <script src="engine.js" defer></script>
+  <script src="script.js" defer></script>
+</body>
+</html>

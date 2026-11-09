@@ -1,0 +1,12 @@
+# Local-only test artifacts
+.preview/
+
+# Dependencies (the project has none, but keep accidental installs out)
+node_modules/
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
